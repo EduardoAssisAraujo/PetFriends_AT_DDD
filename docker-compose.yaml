@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: petfriends-rabbitmq
+    ports:
+      - "5672:5672"   # porta AMQP (usada pelas aplicações)
+      - "15672:15672" # painel de administração web
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-almoxarifado:
+    image: postgres:16
+    container_name: petfriends-postgres-almoxarifado
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: almoxarifado_db
+      POSTGRES_USER: petfriends
+      POSTGRES_PASSWORD: petfriends
+    volumes:
+      - almoxarifado_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U petfriends -d almoxarifado_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-transporte:
+    image: postgres:16
+    container_name: petfriends-postgres-transporte
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: transporte_db
+      POSTGRES_USER: petfriends
+      POSTGRES_PASSWORD: petfriends
+    volumes:
+      - transporte_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U petfriends -d transporte_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  almoxarifado_data:
+  transporte_data:
